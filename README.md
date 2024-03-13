@@ -8,3 +8,6 @@ library for project realised during 4th semester on a course called Data Structu
   * Adding an element in different positions of the list/array
   * Deleting elements from different indexes
   * Scanning the list/array if it contains a given element
+
+## Project 2 - TBC
+## Project 3 - TBC
