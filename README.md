@@ -1,6 +1,6 @@
 # Data Structures
 
-library for project realised during 4th semester on a course called Data Structures.
+library for projects realised during 4th semester on a course called Data Structures.
 
 ## Project 1 - linked list and dynamic array implementation with basic functionalities
 
