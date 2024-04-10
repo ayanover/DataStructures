@@ -73,6 +73,8 @@ std::vector<long long> TestSinglyLinkedListTimes(int size) {
     for(int number : data){
         singlyLinkedList.append(number);
     }
+
+
     auto start = std::chrono::high_resolution_clock::now();
     singlyLinkedList.append(data[0]);
     auto end = std::chrono::high_resolution_clock::now();
@@ -126,11 +128,12 @@ std::vector<long long> TestDynamicArrayTimes(int size) {
     for(int number : data){
         dynamicArray.append(number);
     }
-
+    std::cout<<dynamicArray.getSize()<< std::endl;
     auto start = std::chrono::high_resolution_clock::now();
     dynamicArray.append(data[0]);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    std::cout<< duration.count();
     times.push_back(duration.count());
     std::cout<<times[0]<< std::endl;
 
@@ -188,7 +191,7 @@ void SaveMeasurementsToFile(std::vector<long long> data, std::string filename){
 }
 
 int main() {
-    int ARRAY_SIZES[] = {5000, 10000, 50000, 100000};
+    int ARRAY_SIZES[] = {5000, 10000, 15000, 50000, 75000, 100000};
     for(int size : ARRAY_SIZES){
         std::vector<long long> DLLTimes = TestDoublyLinkedListTimes(size);
         std::vector<long long> SLLTimes = TestSinglyLinkedListTimes(size);
