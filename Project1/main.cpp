@@ -8,12 +8,12 @@
 #include <chrono>
 #include <fstream>
 
-std::vector<double> TestDoublyLinkedListTimes(int size) {
+std::vector<long long> TestDoublyLinkedListTimes(int size) {
 
     auto data = generateRandomVector(size);
 
     DoublyLinkedList<int> doublyLinkedList;
-    std::vector<double> times;
+    std::vector<long long> times;
 
     doublyLinkedList.pushBack(1);
     for(int number : data){
@@ -23,7 +23,7 @@ std::vector<double> TestDoublyLinkedListTimes(int size) {
     auto start = std::chrono::high_resolution_clock::now();
     doublyLinkedList.pushBack(data[0]);
     auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::nano> duration = end - start;
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     times.push_back(duration.count());
 
     start = std::chrono::high_resolution_clock::now();
@@ -65,10 +65,10 @@ std::vector<double> TestDoublyLinkedListTimes(int size) {
     return times;
 }
 
-std::vector<double> TestSinglyLinkedListTimes(int size) {
+std::vector<long long> TestSinglyLinkedListTimes(int size) {
     auto data = generateRandomVector(size);
     SinglyLinkedList<int> singlyLinkedList;
-    std::vector<double> times;
+    std::vector<long long> times;
 
     for(int number : data){
         singlyLinkedList.append(number);
@@ -76,7 +76,7 @@ std::vector<double> TestSinglyLinkedListTimes(int size) {
     auto start = std::chrono::high_resolution_clock::now();
     singlyLinkedList.append(data[0]);
     auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::nano> duration = end - start;
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     times.push_back(duration.count());
 
     start = std::chrono::high_resolution_clock::now();
@@ -118,10 +118,10 @@ std::vector<double> TestSinglyLinkedListTimes(int size) {
     return times;
 }
 
-std::vector<double> TestDynamicArrayTimes(int size) {
+std::vector<long long> TestDynamicArrayTimes(int size) {
     auto data = generateRandomVector(size);
     DynamicArray<int> dynamicArray;
-    std::vector<double> times;
+    std::vector<long long> times;
 
     for(int number : data){
         dynamicArray.append(number);
@@ -130,7 +130,7 @@ std::vector<double> TestDynamicArrayTimes(int size) {
     auto start = std::chrono::high_resolution_clock::now();
     dynamicArray.append(data[0]);
     auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::nano> duration = end - start;
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     times.push_back(duration.count());
     std::cout<<times[0]<< std::endl;
 
@@ -174,7 +174,7 @@ std::vector<double> TestDynamicArrayTimes(int size) {
     return times;
 }
 
-void SaveMeasurementsToFile(std::vector<double> data, std::string filename){
+void SaveMeasurementsToFile(std::vector<long long> data, std::string filename){
     std::ofstream outputFile(filename);
     if (outputFile.is_open()) {
         for (int i = 0; i < data.size(); i++) {
@@ -190,9 +190,9 @@ void SaveMeasurementsToFile(std::vector<double> data, std::string filename){
 int main() {
     int ARRAY_SIZES[] = {5000, 10000, 50000, 100000};
     for(int size : ARRAY_SIZES){
-        std::vector<double> DLLTimes = TestDoublyLinkedListTimes(size);
-        std::vector<double> SLLTimes = TestSinglyLinkedListTimes(size);
-        std::vector<double> DATimes = TestDynamicArrayTimes(size);
+        std::vector<long long> DLLTimes = TestDoublyLinkedListTimes(size);
+        std::vector<long long> SLLTimes = TestSinglyLinkedListTimes(size);
+        std::vector<long long> DATimes = TestDynamicArrayTimes(size);
 
         SaveMeasurementsToFile(DLLTimes, std::to_string(size)+"_DoublyLinkedList");
         SaveMeasurementsToFile(SLLTimes, std::to_string(size)+"_SinglyLinkedList");
