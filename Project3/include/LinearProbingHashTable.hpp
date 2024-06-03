@@ -1,56 +1,78 @@
-//
-// Created by rexiv on 26.05.2024.
-//
+#ifndef LINEAR_PROBING_HASH_TABLE_HPP
+#define LINEAR_PROBING_HASH_TABLE_HPP
 
-#ifndef DATASTRUCTURES_LINEARPROBINGHASHTABLE_HPP
-#define DATASTRUCTURES_LINEARPROBINGHASHTABLE_HPP
-
-
-#include <iostream>
 #include <vector>
+#include <functional>
+#include <limits>
+#include <iostream>
 #include "HashTable.hpp"
 
-class LinearProbingHashTable : public HashTable{
+/**
+ * @class LinearProbingHashTable
+ * @brief Implements a hash table with linear probing for collision resolution.
+ *
+ * @tparam K Type of keys stored in the hash table.
+ * @tparam V Type of values stored in the hash table.
+ */
+template<typename K, typename V>
+class LinearProbingHashTable : public HashTable<K, V>{
 private:
-    int capacity;
-    std::vector<int> table;
-    std::vector<bool> occupied;
+    /**
+     * @struct Entry
+     * @brief Represents an entry in the hash table.
+     */
+    struct Entry {
+        K key;
+        V value;
+        bool isOccupied;
 
-    int hashFunction(int key) {
-        return key % capacity;
+        Entry() : key{}, value{}, isOccupied(false) {}
+    };
+
+    std::vector<Entry> table;
+    static const int TABLE_SIZE = 100000000;
+    static const K EMPTY_SLOT;
+
+    /**
+     * @brief Hash function to map keys to table indices.
+     *
+     * @param key The key to hash.
+     * @return The hashed index.
+     */
+    int hashFunction(const K& key) const {
+        return static_cast<int>(std::hash<K>{}(key) % TABLE_SIZE);
     }
 
 public:
-    LinearProbingHashTable(int size) : capacity(size), table(size, -1), occupied(size, false) {}
+    /**
+     * @brief Constructs a LinearProbingHashTable with a predefined size.
+     */
+    LinearProbingHashTable() : table(TABLE_SIZE) {}
 
-    void insert(int key) override{
-        int index = hashFunction(key);
-        while (occupied[index]) {
-            index = (index + 1) % capacity;
-        }
-        table[index] = key;
-        occupied[index] = true;
-    }
+    /**
+     * @brief Inserts a key-value pair into the hash table.
+     *
+     * @param key The key to insert.
+     * @param value The value associated with the key.
+     */
+    void insert(const K& key, const V& value) override;
 
-    void remove(int key) override{
-        int index = hashFunction(key);
-        while (occupied[index] && table[index] != key) {
-            index = (index + 1) % capacity;
-        }
-        if (table[index] == key) {
-            table[index] = -1;
-            occupied[index] = false;
-        }
-    }
+    /**
+     * @brief Removes a key-value pair from the hash table.
+     *
+     * @param key The key to remove.
+     * @return true if the key was found and removed, false otherwise.
+     */
+    bool remove(const K& key) override;
 
-    void display() override{
-        for (int i = 0; i < capacity; i++) {
-            if (occupied[i])
-                std::cout << i << ": " << table[i] << std::endl;
-            else
-                std::cout << i << ": " << "NULL" << std::endl;
-        }
-    }
+    /**
+     * @brief Searches for a value associated with a given key.
+     *
+     * @param key The key to search for.
+     * @param value Output parameter to store the found value.
+     * @return true if the key was found, false otherwise.
+     */
+    bool search(const K& key, V& value) const override;
 };
 
-#endif //DATASTRUCTURES_LINEARPROBINGHASHTABLE_HPP
+#endif // LINEAR_PROBING_HASH_TABLE_HPP

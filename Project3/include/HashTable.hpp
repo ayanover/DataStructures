@@ -1,16 +1,20 @@
-//
-// Created by rexiv on 26.05.2024.
-//
+#ifndef HASH_TABLE_H
+#define HASH_TABLE_H
 
-#ifndef DATASTRUCTURES_HASHTABLE_HPP
-#define DATASTRUCTURES_HASHTABLE_HPP
+#include <iostream>
+#include <chrono>
+#include <vector>
+#include <random>
+#include <numeric>
+#include <optional>
 
+template<typename K, typename V>
 class HashTable {
 public:
-    virtual void insert(int key) = 0;
-    virtual void remove(int key) = 0;
-    virtual void display() = 0;
-    virtual ~HashTable() = default;
+    virtual void insert(const K& key, const V& value) = 0;
+    virtual V search(const K& key) = 0;
+    virtual void remove(const K& key) = 0;
 };
 
-#endif //DATASTRUCTURES_HASHTABLE_HPP
+
+#endif // HASH_TABLE_H

@@ -5,6 +5,7 @@
 #include "../include/SeparateChainingHashTable.hpp"
 #include "../include/LinearProbingHashTable.hpp"
 #include "../include/CuckooHashTable.hpp"
+#include "../include/RobinHoodHashTable.hpp"
 #include <cstdlib> // for rand()
 
 void fillHashTableWithRandomNumbers(HashTable* hashTable, int size) {
@@ -31,21 +32,21 @@ void testHashTable(HashTable* hashTable) {
     delete hashTable;
 }
 int main() {
-    auto separate = new SeparateChainingHashTable(1001);
-    auto linear = new LinearProbingHashTable(1001);
-    auto cuckoo = new CuckooHashTable(3001);
+    auto separate = new SeparateChainingHashTable(100001);
+    auto linear = new LinearProbingHashTable(100001);
+    auto cuckoo = new CuckooHashTable(300001);
+    auto robin = new RobinHoodHashTable<int, int>();
+
     std::cout << "Testing Separate Chaining Hash Table:\n";
-
-
-    fillHashTableWithRandomNumbers(separate, 1000);
+    fillHashTableWithRandomNumbers(separate, 100000);
     testHashTable(separate);
 
     std::cout << "\nTesting Linear Probing Hash Table:\n";
-    fillHashTableWithRandomNumbers(linear, 1000);
+    fillHashTableWithRandomNumbers(linear, 100000);
     testHashTable(linear);
 
     std::cout << "\nTesting Cuckoo Hash Table:\n";
-    fillHashTableWithRandomNumbers(cuckoo, 1000);
+    fillHashTableWithRandomNumbers(cuckoo, 100000);
     testHashTable(cuckoo);
     return 0;
 }
