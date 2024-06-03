@@ -164,7 +164,6 @@ public:
         size = 0;
     }
 private:
-    // Node structure
     struct Node {
         T data;
         Node *prev;
@@ -173,7 +172,6 @@ private:
         Node(const T &data) : data(data), prev(nullptr), next(nullptr) {}
     };
 
-    // Private member variables
     Node *head;
     Node *tail;
     size_t size;
