@@ -1,5 +1,5 @@
-#ifndef ROBIN_HOOD_HASHING_H
-#define ROBIN_HOOD_HASHING_H
+#ifndef ROBIN_HOOD_HASHING_HPP
+#define ROBIN_HOOD_HASHING_HPP
 
 #include <vector>
 #include <chrono>

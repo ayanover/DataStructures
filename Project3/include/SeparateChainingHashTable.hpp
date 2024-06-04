@@ -1,6 +1,5 @@
-#ifndef HASH_TABLE_H
-#define HASH_TABLE_H
-#include "HashTable.hpp"
+#ifndef SEPARATE_CHAINING_HASH_TABLE_HPP
+#define SEPARATE_CHAINING_HASH_TABLE_HPP
 
 #include <vector>
 #include <list>
@@ -67,4 +66,4 @@ public:
 };
 
 
-#endif // HASH_TABLE_H
+#endif // SEPARATE_CHAINING_HASH_TABLE_H
