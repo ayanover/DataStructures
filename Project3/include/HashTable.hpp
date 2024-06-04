@@ -6,7 +6,7 @@
 #include <vector>
 #include <random>
 #include <numeric>
-#include <optional>
+#include <fstream>
 
 template<typename K, typename V>
 class HashTable {
@@ -14,10 +14,18 @@ public:
     virtual void insert(const K& key, const V& value) = 0;
     virtual V search(const K& key) = 0;
     virtual void remove(const K& key) = 0;
+
+    void testTable(int numberOfElements, int numTrials);
 };
 
+
 template<typename K, typename V>
-void testTables(HashTable<K, V>& hashTable, int numberOfElements, int numTrials) {
+void HashTable<K,V>::testTable(int numberOfElements, int numTrials) {
+    std::ofstream outputFile("hash_table_performance.txt");
+    if (!outputFile.is_open()) {
+        std::cerr << "Failed to open output file!" << '\n';
+        return ;
+    }
     std::vector<long long> insertionTimes(numTrials), searchTimes(numTrials), deletionTimes(numTrials);
 
     for (int trial = 0; trial < numTrials; ++trial) {
@@ -32,34 +40,29 @@ void testTables(HashTable<K, V>& hashTable, int numberOfElements, int numTrials)
 
         auto start = std::chrono::high_resolution_clock::now();
         for (const auto& [key, value] : elements) {
-            hashTable.insert(key, value);
+            insert(key, value);
         }
         auto end = std::chrono::high_resolution_clock::now();
         insertionTimes[trial] = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-        start = std::chrono::high_resolution_clock::now();
-        for (int i = 0; i < numberOfElements; ++i) {
-            int randomKey = elements[dis(gen) % numberOfElements].first;
-            hashTable.search(randomKey);
-        }
-        end = std::chrono::high_resolution_clock::now();
-        searchTimes[trial] = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
         start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < numberOfElements; ++i) {
             int randomKey = elements[dis(gen) % numberOfElements].first;
-            hashTable.remove(randomKey);
+            remove(randomKey);
         }
         end = std::chrono::high_resolution_clock::now();
         deletionTimes[trial] = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     }
 
     double avgInsertionTime = std::accumulate(insertionTimes.begin(), insertionTimes.end(), 0.0) / numTrials;
-    double avgSearchTime = std::accumulate(searchTimes.begin(), searchTimes.end(), 0.0) / numTrials;
     double avgDeletionTime = std::accumulate(deletionTimes.begin(), deletionTimes.end(), 0.0) / numTrials;
 
-    std::cout << "Average insertion time for " << numberOfElements << " elements: " << avgInsertionTime << " ms\n";
-    std::cout << "Average deletion time for " << numberOfElements << " elements: " << avgDeletionTime << " ms\n" << std::endl;
+    outputFile << "Avg insert time for size" << numberOfElements << " : " << avgInsertionTime << '\n';
+    outputFile << "Avg delete time for size" << numberOfElements << " : " << avgInsertionTime << '\n';
+    outputFile.close();
+    std::cout << ": Avg insert time for size" << numberOfElements << " : " << avgInsertionTime << " ms\n";
+    std::cout << ": Avg delete time for size" << numberOfElements << " : " << avgDeletionTime << " ms\n\n" << std::endl;
 }
 
 #endif // HASH_TABLE_H

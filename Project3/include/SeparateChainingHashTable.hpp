@@ -6,64 +6,63 @@
 #include <functional>
 #include "HashTable.hpp"
 
-/**
- * @class SeparateChainingHashTable
- * @brief Implements a hash table using chaining for collision resolution.
- *
- * @tparam K Type of keys stored in the hash table.
- * @tparam V Type of values stored in the hash table.
- */
 template<typename K, typename V>
 class SeparateChainingHashTable : public HashTable<K, V>{
+public:
+    explicit SeparateChainingHashTable(size_t tableSize = 101);
+    void insert(const K& key, const V& value) override;
+    void remove(const K& key) override;
+    V search(const K& key) override;
+
 private:
     struct Entry {
         K key;
         V value;
-
-        Entry(const K& k, const V& v) : key(k), value(v) {}
+        Entry(const K& key, const V& value) : key(key), value(value) {}
     };
 
     std::vector<std::list<Entry>> table;
-    static const int TABLE_SIZE = 1000000;
+    size_t tableSize;
 
-    /**
-     * @brief Hash function to map keys to table indices.
-     *
-     * @param key The key to hash.
-     * @return The hashed index.
-     */
     int hashFunction(const K& key) const;
-
-public:
-    /**
-     * @brief Constructs a HashTable with a predefined size.
-     */
-    SeparateChainingHashTable();
-
-    /**
-     * @brief Inserts a key-value pair into the hash table.
-     *
-     * @param key The key to insert.
-     * @param value The value associated with the key.
-     */
-    void insert(const K& key, const V& value) override;
-
-    /**
-     * @brief Removes a key-value pair from the hash table.
-     *
-     * @param key The key to remove.
-     */
-    void remove(const K& key) override;
-
-    /**
-     * @brief Searches for a value associated with a given key.
-     *
-     * @param key The key to search for.
-     * @param value Output parameter to store the found value.
-     * @return true if the key was found, false otherwise.
-     */
-    bool search(const K& key, V& value) const;
 };
 
+template<typename K, typename V>
+SeparateChainingHashTable<K, V>::SeparateChainingHashTable(size_t tableSize)
+        : table(tableSize), tableSize(tableSize) {}
+
+template<typename K, typename V>
+int SeparateChainingHashTable<K, V>::hashFunction(const K& key) const {
+    return static_cast<int>(std::hash<K>{}(key) % tableSize);
+}
+
+template<typename K, typename V>
+void SeparateChainingHashTable<K, V>::insert(const K& key, const V& value) {
+    int hashValue = hashFunction(key);
+    for (auto& entry : table[hashValue]) {
+        if (entry.key == key) {
+            entry.value = value;
+            return;
+        }
+    }
+    table[hashValue].emplace_back(key, value);
+}
+
+template<typename K, typename V>
+void SeparateChainingHashTable<K, V>::remove(const K& key) {
+    int hashValue = hashFunction(key);
+    table[hashValue].remove_if([&](const Entry& entry) { return entry.key == key; });
+}
+
+template<typename K, typename V>
+V SeparateChainingHashTable<K, V>::search(const K& key) {
+    int hashValue = hashFunction(key);
+    for (const auto& entry : table[hashValue]) {
+        if (entry.key == key) {
+            return entry.value;
+        }
+    }
+    throw std::runtime_error("Key not found");
+}
 
 #endif // SEPARATE_CHAINING_HASH_TABLE_H

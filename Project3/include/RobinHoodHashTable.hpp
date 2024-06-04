@@ -2,68 +2,121 @@
 #define ROBIN_HOOD_HASHING_HPP
 
 #include <vector>
-#include <chrono>
-#include <random>
-#include <numeric>
+#include <stdexcept>
 #include "HashTable.hpp"
 
-/**
- * @class RobinHoodHashing
- * @brief Implements a hash table using Robin Hood hashing technique.
- *
- * @tparam K Type of keys stored in the hash table.
- * @tparam V Type of values stored in the hash table.
- */
 template<typename K, typename V>
-class RobinHoodHashTable : public HashTable<K, V>{
+class RobinHoodHashTable : public HashTable<K, V> {
+public:
+    explicit RobinHoodHashTable(int size) : capacity(size), table(size), EMPTY_KEY(-1), DELETED_KEY(-2) {
+        for (auto &bucket : table) {
+            bucket.key = EMPTY_KEY;
+        }
+    }
+
+    void insert(const K& key, const V& value) override;
+    V search(const K& key) override;
+    void remove(const K& key) override;
+
 private:
     struct Bucket {
         K key;
         V value;
         int probe_count;
 
-        Bucket() : probe_count(0) {}
+        Bucket() : key(-1), probe_count(0) {}
         Bucket(const K& k, const V& v, int p) : key(k), value(v), probe_count(p) {}
     };
 
     std::vector<Bucket> table;
     int capacity;
+    const K EMPTY_KEY;
+    const K DELETED_KEY;
 
-    int hashFunction(const K& key) {
+    int hashFunction(const K& key) const {
         return key % capacity;
     }
 
-public:
-    /**
-     * @brief Constructs a RobinHoodHashing object with a specified capacity.
-     *
-     * @param size The capacity of the hash table.
-     */
-    RobinHoodHashTable(int size) : capacity(size), table(size) {}
-
-    /**
-     * @brief Inserts a key-value pair into the hash table.
-     *
-     * @param key The key to insert.
-     * @param value The value associated with the key.
-     */
-    void insert(const K& key, const V& value) override;
-
-    /**
-     * @brief Searches for a key in the hash table and returns its associated value, if found.
-     *
-     * @param key The key to search for.
-     * @return An optional containing the value associated with the key, or an empty optional if the key is not found.
-     */
-    V search(const K& key) override;
-
-    /**
-     * @brief Removes a key and its associated value from the hash table.
-     *
-     * @param key The key to remove.
-     */
-    void remove(const K& key) override;
+    void resizeTable();
 };
 
+template<typename K, typename V>
+void RobinHoodHashTable<K, V>::insert(const K& key, const V& value) {
+    int index = hashFunction(key);
+    int probe_count = 0;
+    Bucket new_bucket(key, value, probe_count);
 
-#endif // ROBIN_HOOD_HASHING_H
+    while (true) {
+        if (table[index].key == EMPTY_KEY || table[index].key == DELETED_KEY || table[index].probe_count < new_bucket.probe_count) {
+            if (table[index].key == EMPTY_KEY || table[index].key == DELETED_KEY) {
+                table[index] = new_bucket;
+                return;
+            }
+            std::swap(new_bucket, table[index]);
+        }
+        new_bucket.probe_count++;
+        index = (index + 1) % capacity;
+
+        // If we loop around, resize the table
+        if (index == hashFunction(key)) {
+            resizeTable();
+            insert(key, value);
+            return;
+        }
+    }
+}
+
+template<typename K, typename V>
+V RobinHoodHashTable<K, V>::search(const K& key) {
+    int index = hashFunction(key);
+    int probe_count = 0;
+
+    while (probe_count <= table[index].probe_count) {
+        if (table[index].key == key) {
+            return table[index].value;
+        }
+        if (table[index].key == EMPTY_KEY) {
+            break;
+        }
+        index = (index + 1) % capacity;
+        probe_count++;
+    }
+    throw std::runtime_error("Key not found");
+}
+
+template<typename K, typename V>
+void RobinHoodHashTable<K, V>::remove(const K& key) {
+    int index = hashFunction(key);
+    int probe_count = 0;
+
+    while (probe_count <= table[index].probe_count) {
+        if (table[index].key == key) {
+            table[index].key = DELETED_KEY;
+            table[index].value = V();
+            return;
+        }
+        if (table[index].key == EMPTY_KEY) {
+            return;
+        }
+        index = (index + 1) % capacity;
+        probe_count++;
+    }
+}
+
+template<typename K, typename V>
+void RobinHoodHashTable<K, V>::resizeTable() {
+    std::vector<Bucket> old_table = table;
+    capacity *= 2;
+    table = std::vector<Bucket>(capacity);
+    for (auto &bucket : table) {
+        bucket.key = EMPTY_KEY;
+    }
+
+    for (const auto& bucket : old_table) {
+        if (bucket.key != EMPTY_KEY && bucket.key != DELETED_KEY) {
+            insert(bucket.key, bucket.value);
+        }
+    }
+}
+
+#endif // ROBIN_HOOD_HASHING_HPP

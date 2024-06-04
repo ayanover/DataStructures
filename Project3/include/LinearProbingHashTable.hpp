@@ -7,72 +7,96 @@
 #include <iostream>
 #include "HashTable.hpp"
 
-/**
- * @class LinearProbingHashTable
- * @brief Implements a hash table with linear probing for collision resolution.
- *
- * @tparam K Type of keys stored in the hash table.
- * @tparam V Type of values stored in the hash table.
- */
 template<typename K, typename V>
 class LinearProbingHashTable : public HashTable<K, V>{
+public:
+    explicit LinearProbingHashTable(size_t tableSize = 1000001);
+    void insert(const K& key, const V& value) override;
+    void remove(const K& key) override;
+    V search(const K& key) override;
+
 private:
-    /**
-     * @struct Entry
-     * @brief Represents an entry in the hash table.
-     */
     struct Entry {
         K key;
         V value;
-        bool isOccupied;
-
-        Entry() : key{}, value{}, isOccupied(false) {}
+        bool isOccupied = false;
     };
 
     std::vector<Entry> table;
-    static const int TABLE_SIZE = 100000000;
+    size_t tableSize;
     static const K EMPTY_SLOT;
 
-    /**
-     * @brief Hash function to map keys to table indices.
-     *
-     * @param key The key to hash.
-     * @return The hashed index.
-     */
-    int hashFunction(const K& key) const {
-        return static_cast<int>(std::hash<K>{}(key) % TABLE_SIZE);
-    }
-
-public:
-    /**
-     * @brief Constructs a LinearProbingHashTable with a predefined size.
-     */
-    LinearProbingHashTable() : table(TABLE_SIZE) {}
-
-    /**
-     * @brief Inserts a key-value pair into the hash table.
-     *
-     * @param key The key to insert.
-     * @param value The value associated with the key.
-     */
-    void insert(const K& key, const V& value) override;
-
-    /**
-     * @brief Removes a key-value pair from the hash table.
-     *
-     * @param key The key to remove.
-     * @return true if the key was found and removed, false otherwise.
-     */
-    bool remove(const K& key) override;
-
-    /**
-     * @brief Searches for a value associated with a given key.
-     *
-     * @param key The key to search for.
-     * @param value Output parameter to store the found value.
-     * @return true if the key was found, false otherwise.
-     */
-    bool search(const K& key, V& value) const override;
+    int hashFunction(const K& key) const;
 };
+
+template<typename K, typename V>
+const K LinearProbingHashTable<K, V>::EMPTY_SLOT = std::numeric_limits<K>::min();
+
+template<typename K, typename V>
+LinearProbingHashTable<K, V>::LinearProbingHashTable(size_t tableSize)
+        : table(tableSize), tableSize(tableSize) {
+    for (auto& entry : table) {
+        entry.key = EMPTY_SLOT;
+    }
+}
+
+template<typename K, typename V>
+int LinearProbingHashTable<K, V>::hashFunction(const K& key) const {
+    return static_cast<int>(std::hash<K>{}(key) % tableSize);
+}
+
+template<typename K, typename V>
+void LinearProbingHashTable<K, V>::insert(const K& key, const V& value) {
+    int hashValue = hashFunction(key);
+    int startValue = hashValue;
+    while (table[hashValue].isOccupied) {
+        if (table[hashValue].key == key) {
+            table[hashValue].value = value;
+            return;
+        }
+        hashValue = (hashValue + 1) % tableSize;
+        if (hashValue == startValue) {
+            std::cerr << "HashTable is full. Cannot insert key: " << key << std::endl;
+            return;
+        }
+    }
+    table[hashValue].key = key;
+    table[hashValue].value = value;
+    table[hashValue].isOccupied = true;
+}
+
+template<typename K, typename V>
+void LinearProbingHashTable<K, V>::remove(const K& key) {
+    int hashValue = hashFunction(key);
+    int startValue = hashValue;
+    while (table[hashValue].isOccupied) {
+        if (table[hashValue].key == key) {
+            table[hashValue].isOccupied = false;
+            table[hashValue].key = EMPTY_SLOT;
+            return;
+        }
+        hashValue = (hashValue + 1) % tableSize;
+        if (hashValue == startValue) {
+            return;
+        }
+    }
+    return;
+}
+
+template<typename K, typename V>
+V LinearProbingHashTable<K, V>::search(const K& key) {
+    int hashValue = hashFunction(key);
+    int startValue = hashValue;
+    while (table[hashValue].isOccupied) {
+        if (table[hashValue].key == key) {
+            return table[hashValue].value;
+        }
+        hashValue = (hashValue + 1) % tableSize;
+        if (hashValue == startValue) {
+            break;
+        }
+    }
+    throw std::runtime_error("Key not found");
+}
 
 #endif // LINEAR_PROBING_HASH_TABLE_HPP
